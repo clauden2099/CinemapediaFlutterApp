@@ -1,3 +1,5 @@
+/*Este modelo de datos es con el que se va a estar trabajando en la aplicación
+para realizar las diferentes acciones de la misma */
 class Movie {
   final bool adult;
   final String backdropPath;
