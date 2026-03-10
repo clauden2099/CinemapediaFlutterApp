@@ -22,6 +22,24 @@ class MoviedbDatasources extends MoviesDatasource {
     ),
   );
 
+  List<Movie> _jsonToMovies(Map<String, dynamic> json) {
+    /*Aquí se esta convirtiendo la respuesta JSON de la api al modelo de datos
+    MovieDbResponse */
+    final movieDBResponse = MovieDbResponse.fromJson(json);
+    /*Aquí se esta convirtiendo el modelo de MovieMovieDB a la entidad Movie
+    usando el mapper para la conversión de estos, para acceder a MovieMovieDB
+    se tiene que ingresar al modelo MovieDbResponse que es donde esta la propiedad
+    de results que es un arreglo que guarda la lista de modelos de MovieMovieDB*/
+    final List<Movie> movies = movieDBResponse.results
+        /*Por cada elemento de la lista se ejecuta esta condición si la conidición
+        no se cumple ese elemento no se agrega a la lista */
+        .where((moviedb) => moviedb.posterPath != 'no-poster')
+        .map((moviedb) => MovieMapper.movieDBToEntity(moviedb))
+        .toList();
+
+    return movies;
+  }
+
   /*Se implementaron los métodos de la clase abastracta */
   @override
   Future<List<Movie>> getNowPlaying({int page = 1}) async {
@@ -29,7 +47,10 @@ class MoviedbDatasources extends MoviesDatasource {
     que se indica en el método get es hacia donde se realizara la petición
     y esta se une tomando encuenta todas las propiedades por defecto
     que tiene definido el objeto dio */
-    final response = await dio.get('/movie/now_playing');
+    final response = await dio.get(
+      '/movie/now_playing',
+      queryParameters: {'page': page},
+    );
     /*Aquí se esta convirtiendo la respuesta JSON de la api al modelo de datos
     MovieDbResponse */
     final movieDBResponse = MovieDbResponse.fromJson(response.data);
@@ -45,5 +66,47 @@ class MoviedbDatasources extends MoviesDatasource {
         .toList();
 
     return movies;
+  }
+
+  @override
+  Future<List<Movie>> getPopular({int page = 1}) async {
+    /*Aquí se hace uso del objeto dio definido anteriormente y el paremtro
+    que se indica en el método get es hacia donde se realizara la petición
+    y esta se une tomando encuenta todas las propiedades por defecto
+    que tiene definido el objeto dio */
+    final response = await dio.get(
+      '/movie/now_playing',
+      queryParameters: {'page': page},
+    );
+
+    return _jsonToMovies(response.data);
+  }
+
+  @override
+  Future<List<Movie>> getTopRated({int page = 1}) async {
+    /*Aquí se hace uso del objeto dio definido anteriormente y el paremtro
+    que se indica en el método get es hacia donde se realizara la petición
+    y esta se une tomando encuenta todas las propiedades por defecto
+    que tiene definido el objeto dio */
+    final response = await dio.get(
+      '/movie/top_rated',
+      queryParameters: {'page': page},
+    );
+
+    return _jsonToMovies(response.data);
+  }
+
+  @override
+  Future<List<Movie>> getUpcoming({int page = 1}) async {
+    /*Aquí se hace uso del objeto dio definido anteriormente y el paremtro
+    que se indica en el método get es hacia donde se realizara la petición
+    y esta se une tomando encuenta todas las propiedades por defecto
+    que tiene definido el objeto dio */
+    final response = await dio.get(
+      '/movie/upcoming',
+      queryParameters: {'page': page},
+    );
+
+    return _jsonToMovies(response.data);
   }
 }

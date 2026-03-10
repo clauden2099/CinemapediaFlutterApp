@@ -11,6 +11,36 @@ final nowPlayingMoviesProvider =
       return MoviesNotifier(fetchMoreMovies: fetchMoreMovies);
     });
 
+final popularMoviesProvider = StateNotifierProvider<MoviesNotifier, List<Movie>>(
+  (ref) {
+    /*Aquí se guarda la referencia a la función de movieRepositoryProvider que 
+      es getNowPlaying que se utiliza para obtener las peliculas */
+    final fetchMoreMovies = ref.watch(movieRepositoryProvider).getPopular;
+
+    return MoviesNotifier(fetchMoreMovies: fetchMoreMovies);
+  },
+);
+
+final topRatedMoviesProvider = StateNotifierProvider<MoviesNotifier, List<Movie>>(
+  (ref) {
+    /*Aquí se guarda la referencia a la función de movieRepositoryProvider que 
+      es getNowPlaying que se utiliza para obtener las peliculas */
+    final fetchMoreMovies = ref.watch(movieRepositoryProvider).getTopRated;
+
+    return MoviesNotifier(fetchMoreMovies: fetchMoreMovies);
+  },
+);
+
+final upcomingMoviesProvider = StateNotifierProvider<MoviesNotifier, List<Movie>>(
+  (ref) {
+    /*Aquí se guarda la referencia a la función de movieRepositoryProvider que 
+      es getNowPlaying que se utiliza para obtener las peliculas */
+    final fetchMoreMovies = ref.watch(movieRepositoryProvider).getUpcoming;
+
+    return MoviesNotifier(fetchMoreMovies: fetchMoreMovies);
+  },
+);
+
 /*Con typedef se utiliza para definir la estrucutra de una función */
 typedef MovieCallback = Future<List<Movie>> Function({int page});
 
@@ -19,13 +49,19 @@ en este caso se indica que la clase MoviesNotifier va a controlar el estado
 de List<Movie> */
 class MoviesNotifier extends StateNotifier<List<Movie>> {
   int currentPage = 0;
+  bool isLoading = false;
   MovieCallback fetchMoreMovies;
 
   MoviesNotifier({required this.fetchMoreMovies}) : super([]);
 
   Future<void> loadNextPage() async {
-    currentPage ++;
-    final List<Movie> movies = await fetchMoreMovies(page: currentPage);  
+    if (isLoading) return;
+
+    isLoading = true;
+    currentPage++;
+    final List<Movie> movies = await fetchMoreMovies(page: currentPage);
     state = [...state, ...movies];
+    await Future.delayed(const Duration(milliseconds: 300));
+    isLoading = false;
   }
 }
