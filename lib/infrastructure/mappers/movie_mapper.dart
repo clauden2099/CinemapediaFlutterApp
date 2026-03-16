@@ -23,16 +23,19 @@ class MovieMapper {
     originalTitle: moviedb.originalTitle,
     overview: moviedb.overview,
     popularity: moviedb.popularity,
-    posterPath: moviedb.posterPath != ''
+    posterPath: (moviedb.posterPath != '')
         ? 'https://image.tmdb.org/t/p/w500${moviedb.posterPath}'
-        : 'https://th.bing.com/th/id/OIP.59acm7M8zfvbkDUNHr6KdQAAAA?w=186&h=223&c=7&r=0&o=7&pid=1.7&rm=3',
-    releaseDate: moviedb.releaseDate,
+        : 'https://i.ebayimg.com/images/g/sdsAAOSwUzpiEEaV/s-l400.jpg',
+    releaseDate: (moviedb.releaseDate != null)
+        ? moviedb.releaseDate!
+        : DateTime.now(),
     title: moviedb.title,
     video: moviedb.video,
     voteAverage: moviedb.voteAverage,
     voteCount: moviedb.voteCount,
   );
 
+  /*Este método estatico convierte una MovieDetails a una entidad Movie */
   static Movie movieDetailsToEntity(MovieDetails moviedb) => Movie(
     adult: moviedb.adult,
     /*En caso de que la pelicula no tenga una imagen de esta misma se colocara una imagen

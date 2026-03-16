@@ -1,11 +1,15 @@
+import 'package:cinemapedia/domain/entities/movie.dart';
+import 'package:cinemapedia/presentation/delegates/search_movie_delegate.dart';
+import 'package:cinemapedia/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class CustomAppbar extends StatelessWidget {
+class CustomAppbar extends ConsumerWidget {
   const CustomAppbar({super.key});
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleMedium;
 
@@ -19,9 +23,41 @@ class CustomAppbar extends StatelessWidget {
             children: [
               Icon(Icons.movie_outlined, color: colors.primary),
               const SizedBox(width: 5),
-              Text('Cinemapedia', style: titleStyle,),
+              Text('Cinemapedia', style: titleStyle),
               const Spacer(),
-              IconButton(onPressed: (){}, icon: const Icon(Icons.search))
+              IconButton(
+                onPressed: () async {
+                  /*Se accede al provider que regresa la implementación del
+                  repositorio para así poder acceder a la función que regresa
+                  la búsqueda de películas */
+                  //final movieRepository = ref.read(movieRepositoryProvider);
+                  final searchedMovies = ref.read(searchedMoviesProvider);
+                  final searchQuery = ref.read(searchQueryProvider);
+                  /*Aquí se indica el showSearch y se puede especificar un tipo de 
+                  dato que recibe en base a las acciones que se hagan en el delegate
+                  cuando se salga de esté y envíe algun tipo de información cuando*/
+                  final movie = await showSearch<Movie?>(
+                    //query es el texto que se muestra en el serach
+                    query: searchQuery,
+                    context: context,
+                    delegate: SearchMovieDelegate(
+                      initialMovies: searchedMovies,
+                      //Se envía la función para buscar películas
+                      searchMovies: ref
+                          .read(searchedMoviesProvider.notifier)
+                          .searchMoviesByQuery,
+                    ),
+                  );
+                  // 1. Verificamos si el widget sigue existiendo antes de usar el context
+                  if (!context.mounted) return;
+
+                  // 2. Si el usuario seleccionó una película, navegamos
+                  if (movie != null) {
+                    context.push('/movie/${movie.id}');
+                  }
+                },
+                icon: const Icon(Icons.search),
+              ),
             ],
           ),
         ),
